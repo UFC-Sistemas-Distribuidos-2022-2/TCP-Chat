@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 	"sync"
 )
@@ -13,7 +14,6 @@ const prefix = "/"
 
 func main() {
 
-	//var keepInFor bool = true
 	var comand string = ""
 	var IPPort string = ""
 	var msg string = ""
@@ -22,6 +22,7 @@ func main() {
 	for comand != "/ENTRAR" {
 		fmt.Scan(&comand)
 	}
+
 	fmt.Println("Informe o ip e a porta que deseja tentar se conectar no formato IP:PORTA")
 	fmt.Scan(&IPPort)
 	p := make([]byte, 2048)
@@ -30,6 +31,7 @@ func main() {
 		fmt.Printf("Some error %v", err)
 		return
 	}
+
 	conn.Read((p))
 	fmt.Printf("%s", p)
 	var username string
@@ -47,10 +49,8 @@ func main() {
 var wg sync.WaitGroup
 
 func Read(conn net.Conn, p []byte) {
-
-	reader := bufio.NewReader(conn)
 	for {
-		str, err := reader.Read(p)
+		str, err := conn.Read(p)
 		if err != nil {
 			wg.Done()
 			return
@@ -60,21 +60,19 @@ func Read(conn net.Conn, p []byte) {
 }
 
 func Write(conn net.Conn, username string, ip string, port string) {
-	var msg string
-	fmt.Scan(&msg)
-	// msg, err := read.ReadString('\n')
-	// if err != nil {
-	// 	fmt.Printf("Some error %v", err)
-	// 	return
-	// }
-	fmt.Println(username, msg, ip, port)
-	p, err := jsonBuilder(username, msg, ip, port)
-	if err != nil {
-		fmt.Printf("Some error %v", err)
-		return
+	for {
+		//var msg string
+		//fmt.Scan(&msg)
+		in := bufio.NewReader(os.Stdin)
+
+		line, err := in.ReadString('\n')
+		p, err := jsonBuilder(username, line, ip, port)
+		if err != nil {
+			fmt.Printf("Some error %v", err)
+			return
+		}
+		conn.Write(p)
 	}
-	writer := bufio.NewWriter(conn)
-	writer.Write(p)
 
 }
 

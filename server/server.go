@@ -55,7 +55,6 @@ func handleUserConnection(c *net.TCPConn, p []byte) {
 
 		err = json.Unmarshal(p[:n], &userMsg)
 		completAddress := userMsg.IP + ":" + userMsg.Port
-		fmt.Println(userMsg.User)
 		if userMsg.User != "" {
 			if notIn(c) {
 				conns = append(conns, c)
@@ -94,7 +93,7 @@ type UserMsg struct {
 	IP   string
 	Port string
 }
-type User struct {
+type Users struct {
 	User string
 	IP   string
 	Port string
