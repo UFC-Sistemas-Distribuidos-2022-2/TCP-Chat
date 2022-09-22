@@ -11,9 +11,9 @@ import (
 const welcomeMsg = "Olá, por favor, me informa seu nome de usuário:"
 
 var comands [3]string = [3]string{"/ENTRAR", "/SAIR", "/USUARIOS"}
+var conns []*net.TCPConn
 
 func main() {
-	var conns []*net.TCPConn
 	fmt.Println("server test")
 
 	p := make([]byte, 2048)
@@ -26,47 +26,66 @@ func main() {
 		fmt.Printf("Some error %v\n", err)
 		return
 	}
-	//defer ser.Close()
+	defer ser.Close()
 
 	for {
 		conn, err := ser.AcceptTCP()
 		if err != nil {
 			return
 		}
-		conns = append(conns, conn)
 		conn.Write([]byte(welcomeMsg))
 		//for _, c := range conns {
 		//fmt.Println(c, c.RemoteAddr())
 		//}
-		go handleUserConnection(conn, p, conns)
+		if notIn(conn) {
+			go handleUserConnection(conn, p)
+
+		}
 	}
 }
 
-func handleUserConnection(c net.Conn, p []byte, conns []*net.TCPConn) {
+func handleUserConnection(c *net.TCPConn, p []byte) {
 
 	for {
 		n, err := bufio.NewReader(c).Read(p)
 		if err != nil {
-			return
+			fmt.Printf("Some error %v\n", err)
 		}
 		var userMsg UserMsg
 
 		err = json.Unmarshal(p[:n], &userMsg)
 		completAddress := userMsg.IP + ":" + userMsg.Port
-		fmt.Println(completAddress)
+		fmt.Println(userMsg.User)
 		if userMsg.User != "" {
+			if notIn(c) {
+				conns = append(conns, c)
+				for _, conn := range conns {
+					if conn != c {
+						conn.Write([]byte(userMsg.User + " entrou no chat\n"))
+					}
+
+				}
+			}
 			for _, c := range conns {
-				fmt.Println(userMsg.Body)
 				if userMsg.Body != "" {
 					if c.RemoteAddr().String() != completAddress {
-						c.Write([]byte(userMsg.Body))
-						//fmt.Println(c, c.RemoteAddr())
+						c.Write([]byte(userMsg.User + ": " + userMsg.Body))
 					}
 				}
 
 			}
 		}
 	}
+}
+
+func notIn(c *net.TCPConn) bool {
+	var aux int = 0
+	for _, conn := range conns {
+		if conn.RemoteAddr() != c.RemoteAddr() {
+			aux++
+		}
+	}
+	return aux == len(conns)
 }
 
 type UserMsg struct {
