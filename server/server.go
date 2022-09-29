@@ -15,7 +15,7 @@ var comands [3]string = [3]string{"/HELP", "/SAIR", "/USUARIOS"}
 var conns []*net.TCPConn
 
 func main() {
-	fmt.Println("server test")
+	fmt.Println("server ON")
 
 	addr := net.TCPAddr{
 		Port: 1234,
@@ -39,7 +39,6 @@ func main() {
 			user.User = string(p)
 			user.Conn = conn
 			users = append(users, user)
-			fmt.Println(users)
 			conn.Write([]byte("Bem vindo " + user.User + " digite /HELP para exibir a lista de comandos\n"))
 		}
 		if notIn(conn) {
@@ -103,7 +102,6 @@ func handleUserConnection(c *net.TCPConn, p []byte, users *[]Users) {
 							// /USUARIOS
 						case 2:
 							if c.RemoteAddr().String() == completAddress {
-								fmt.Println(users)
 								for _, user := range *users {
 									c.Write([]byte(user.User + "\n"))
 								}
