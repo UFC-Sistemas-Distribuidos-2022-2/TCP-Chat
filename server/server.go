@@ -1,15 +1,12 @@
 package main
 
 import (
-	"encoding/json"
-	"strings"
-
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"net"
+	"strings"
 )
-
-const welcomeMsg = "Olá, por favor, me informa seu nome de usuário:"
 
 var comands [3]string = [3]string{"/HELP", "/SAIR", "/USUARIOS"}
 var conns []*net.TCPConn

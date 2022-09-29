@@ -10,8 +10,6 @@ import (
 	"sync"
 )
 
-const prefix = "/"
-
 func main() {
 
 	var comand string = ""
