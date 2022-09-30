@@ -129,7 +129,7 @@ func notIn(c *net.TCPConn) bool {
 
 func wasCommandList(msg string, comandList []string) (bool, int) {
 	for index := range comandList {
-		if strings.HasPrefix(msg, comandList[index]) {
+		if strings.HasPrefix(msg, comandList[index]) && len(msg) == len("\t "+comandList[index]) {
 			return true, index
 		}
 	}
